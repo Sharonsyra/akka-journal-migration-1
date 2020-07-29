@@ -42,30 +42,28 @@ object Main extends App with ProtoEncryption {
         }
       }
       finally {
+        println("Migration starting...")
+
+        stm.execute("ALTER TABLE journal RENAME TO old_journal")
+        stm.execute("ALTER TABLE new_journal RENAME TO journal")
+
+        val last_ordering_number =
+          stm.executeQuery("SELECT ordering FROM journal ORDER BY ordering DESC LIMIT 1")
+
+        while (last_ordering_number.next()) {
+          val next_ordering_number = last_ordering_number.getInt(1) + 1
+
+          stm.execute("ALTER TABLE journal " +
+            "ALTER ordering SET NOT NULL, " +
+            "ALTER ordering ADD GENERATED ALWAYS AS IDENTITY (START WITH "
+            + next_ordering_number + ");")
+
+          println("Migration is done")
+        }
+
+        last_ordering_number.close()
         rs.close()
       }
-
-      println("Migration starting...")
-
-      stm.execute("ALTER TABLE journal RENAME TO old_journal")
-      stm.execute("ALTER TABLE new_journal RENAME TO journal")
-
-      val last_ordering_number =
-        stm.executeQuery("SELECT ordering FROM journal ORDER BY ordering DESC LIMIT 1")
-
-      while (last_ordering_number.next()) {
-
-        val next_ordering_number = last_ordering_number.getInt(1) + 1
-
-        stm.execute("ALTER TABLE journal " +
-          "ALTER ordering SET NOT NULL, " +
-          "ALTER ordering ADD GENERATED ALWAYS AS IDENTITY (START WITH "
-          + next_ordering_number + ");")
-
-        println("Migration is done")
-
-      }
-      last_ordering_number.close()
 
     }
     finally {
