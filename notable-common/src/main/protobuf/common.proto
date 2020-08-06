@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.namely.protobuf.notable;
+
+message Note {
+    string note_id = 1;
+    string note_title = 2;
+    string note_content = 3;
+    Timestamp created_at = 4;
+    Timestamp updated_at = 5;
+}
+
+message ListNotes {
+    repeated Note notes = 1;
+}
+
+message Timestamp {
+    int64 seconds = 1;
+    int32 nanos = 2;
+}

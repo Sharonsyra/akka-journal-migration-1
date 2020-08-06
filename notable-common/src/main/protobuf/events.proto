@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package com.namely.protobuf.notable;
+
+message NoteCreated {
+    string note_id = 1;
+    string note_title = 2;
+    string note_content = 3;
+}
+
+message NoteChanged {
+    string note_id = 1;
+    string note_title = 2;
+    string note_content = 3;
+}
+
+message NoteDeleted {
+    string note_id = 1;
+}

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package com.namely.protobuf.notable;
+
+import "commands.proto";
+import "common.proto";
+
+service NotableService {
+    rpc CreateAccount(CreateNoteRequest) returns (Note) {}
+    rpc GetAccount(GetNoteRequest) returns (Note) {}
+    rpc ChangeNote(ChangeNoteRequest) returns (Note) {}
+    rpc DeleteNote(DeleteNoteRequest) returns (Note) {}
+}

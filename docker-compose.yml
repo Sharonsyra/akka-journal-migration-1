@@ -1,0 +1,78 @@
+version: "3.6"
+
+services:
+  journalmigrationserver:
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    ports:
+      - 50051:50051
+      - 50052:50052
+      - 50053:50053
+    environment:
+      - SERVICE_NAME=journalmigration
+      - COS_HOST=chiefofstate
+      - COS_PORT=9000
+    depends_on:
+      - chiefofstate
+      - postgres
+    volumes:
+      - .:/app
+
+  postgres:
+    image: postgres
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:delegated
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@namely.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - 5050:80
+
+  chiefofstate:
+    image: registry.namely.land/namely/chief-of-state:0.1.0
+#    hostname: "chiefofstate"
+    depends_on:
+      - postgres
+    ports:
+      - 9000:9000
+      - 9102:9102
+      - 9095:9095
+      - 5266:5266
+    environment:
+      COS_ADDRESS: "0.0.0.0"
+      COS_PORT: 9000
+      WRITE_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
+      WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
+      HANDLER_SERVICE_STATE_PROTO: "chief_of_state.BankAccount"
+      HANDLER_SERVICE_EVENTS_PROTOS: "chief_of_state.AccountOpened,chief_of_state.MoneyTransferred,chief_of_state.MoneyReceived"
+      COS_SERVICE_NAME: "chiefofstate"
+      NAMELY_ENV: "dev"
+      TEAM_NAME: "data"
+      COS_POSTGRES_USER: "postgres"
+      COS_POSTGRES_PASSWORD: "changeme"
+      COS_POSTGRES_HOST: "postgres"
+      COS_POSTGRES_PORT: 5432
+      COS_POSTGRES_DB: "postgres"
+      COS_POSTGRES_SCHEMA: "public"
+      COS_EVENTS_BATCH_THRESHOLD: 2
+      COS_NUM_SNAPSHOTS_TO_RETAIN: 2
+      COS_READ_SIDE_ENABLED: "true"
+      COS_READ_SIDE_OFFSET_DB_HOST: "postgres"
+      COS_READ_SIDE_OFFSET_DB_PORT: 5432
+      COS_READ_SIDE_OFFSET_DB_USER: "postgres"
+      COS_READ_SIDE_OFFSET_DB_PASSWORD: "changeme"
+      COS_READ_SIDE_OFFSET_DB: "postgres"
+      COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
+      READ_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
+      READ_SIDE_HANDLER_SERVICE_PORT: 50053
+      JAVA_OPTS: "-Dconfig.resource=docker.conf"
