@@ -23,7 +23,11 @@ lazy val `notable-common` = (project in file("notable-common"))
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
     ),
       PB.protoSources in Compile := Seq(file("notable-common/src/main/protobuf")),
-      PB.targets in Compile := Seq(scalapb.gen() -> (sourceManaged in Compile).value)
+      PB.targets in Compile := Seq(scalapb.gen() -> (sourceManaged in Compile).value),
+    akkaGrpcGeneratedLanguages := Seq(AkkaGrpc.Scala),
+    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client),
+    akkaGrpcCodeGeneratorSettings := akkaGrpcCodeGeneratorSettings.value.filterNot(_ == "flat_package"),
+    akkaGrpcCodeGeneratorSettings += "server_power_apis"
   )
 
 lazy val `notable-api` = (project in file("notable-api"))
