@@ -1,8 +1,8 @@
 name := "chief-of-state-journal-migration-test"
 
-version := "0.1"
+version  in ThisBuild := "0.1"
 
-scalaVersion := "2.13.3"
+scalaVersion in ThisBuild := "2.13.3"
 
 
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided"
@@ -22,8 +22,7 @@ lazy val `notable-common` = (project in file("notable-common"))
     libraryDependencies ++= Seq(
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
     ),
-      PB.protoSources in Compile := Seq(file("notable-common/src/main/protobuf")),
-      PB.targets in Compile := Seq(scalapb.gen() -> (sourceManaged in Compile).value),
+    PB.protoSources in Compile :=Seq(file("notable-common/src/main/protobuf")),
     akkaGrpcGeneratedLanguages := Seq(AkkaGrpc.Scala),
     akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client),
     akkaGrpcCodeGeneratorSettings := akkaGrpcCodeGeneratorSettings.value.filterNot(_ == "flat_package"),
