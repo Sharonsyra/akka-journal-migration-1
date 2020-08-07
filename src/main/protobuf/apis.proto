@@ -6,8 +6,9 @@ message Note {
     string note_id = 1;
     string note_title = 2;
     string note_content = 3;
-    Timestamp created_at = 4;
-    Timestamp updated_at = 5;
+    bool is_deleted = 4;
+    Timestamp created_at = 5;
+    Timestamp updated_at = 6;
 }
 
 message ListNotes {

@@ -1,0 +1,3 @@
+[submodule "chief-of-state-protos"]
+	path = chief-of-state-protos
+	url = https://github.com/namely/chief-of-state-protos.git

@@ -2,6 +2,7 @@ version: "3.6"
 
 services:
   journalmigrationserver:
+    image: journalmigration-server
     build:
       context: .
       dockerfile: db/Dockerfile
@@ -22,7 +23,7 @@ services:
   postgres:
     image: postgres
     volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:delegated
+      - ./db:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
@@ -53,8 +54,8 @@ services:
       COS_PORT: 9000
       WRITE_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
       WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
-      HANDLER_SERVICE_STATE_PROTO: "chief_of_state.BankAccount"
-      HANDLER_SERVICE_EVENTS_PROTOS: "chief_of_state.AccountOpened,chief_of_state.MoneyTransferred,chief_of_state.MoneyReceived"
+      HANDLER_SERVICE_STATE_PROTO: "notable.Note"
+      HANDLER_SERVICE_EVENTS_PROTOS: "notable.NoteCreated,notable.NoteChanged,notable.NoteDeleted"
       COS_SERVICE_NAME: "chiefofstate"
       NAMELY_ENV: "dev"
       TEAM_NAME: "data"

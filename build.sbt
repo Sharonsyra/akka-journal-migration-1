@@ -4,48 +4,24 @@ version := "0.1"
 
 scalaVersion := "2.13.3"
 
+mainClass in (Compile, run) := Some("com.namely.notable.Notable")
 
-val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided"
-val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
+libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-actor-typed" % "2.6.8",
+  "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+)
 
-lazy val `notable-service` = (project in file("."))
-  .aggregate(
-    `notable-api`,
-    `notable`,
-    `notable-common`
-  )
+// Akka dependencies used by Lagom
+dependencyOverrides ++= Seq(
+  "com.typesafe.akka" %% "akka-discovery" % "2.6.8",
+  "com.typesafe.akka" %% "akka-stream" % "2.6.8",
+  "com.typesafe.akka" %% "akka-protobuf-v3" % "2.6.8",
 
-lazy val `notable-common` = (project in file("notable-common"))
-  .enablePlugins(AkkaGrpcPlugin)
-  .settings(
-    name := "notable-common",
-    libraryDependencies ++= Seq(
-      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
-    ),
-      PB.protoSources in Compile := Seq(file("notable-common/src/main/protobuf")),
-      PB.targets in Compile := Seq(scalapb.gen() -> (sourceManaged in Compile).value),
-    akkaGrpcGeneratedLanguages := Seq(AkkaGrpc.Scala),
-    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client),
-    akkaGrpcCodeGeneratorSettings := akkaGrpcCodeGeneratorSettings.value.filterNot(_ == "flat_package"),
-    akkaGrpcCodeGeneratorSettings += "server_power_apis"
-  )
+)
 
-lazy val `notable-api` = (project in file("notable-api"))
-  .settings(
-    libraryDependencies ++= Seq(
-      lagomScaladslApi
-    )
-  )
-  .dependsOn(`notable-common`)
+PB.protoSources in Compile := Seq(
+  file("chief-of-state-protos/chief_of_state"),
+  file("src/main/protobuf")
+)
 
-lazy val `notable` = (project in file("notable"))
-  .enablePlugins(LagomScala)
-  .settings(
-    libraryDependencies ++= Seq(
-      lagomScaladslTestKit,
-      macwire,
-      scalaTest
-    )
-  )
-  .settings(lagomForkedTestSettings)
-  .dependsOn(`notable-api`, `notable-common`)
+enablePlugins(AkkaGrpcPlugin)

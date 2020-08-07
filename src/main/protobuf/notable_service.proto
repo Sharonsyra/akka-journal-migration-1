@@ -7,11 +7,11 @@ option java_outer_classname = "NotableProto";
 package com.namely.protobuf.notable;
 
 import "commands.proto";
-import "common.proto";
+import "apis.proto";
 
 service NotableService {
-    rpc CreateAccount(CreateNoteRequest) returns (Note) {}
-    rpc GetAccount(GetNoteRequest) returns (Note) {}
+    rpc CreateNote(CreateNoteRequest) returns (Note) {}
+    rpc GetNote(GetNoteRequest) returns (Note) {}
     rpc ChangeNote(ChangeNoteRequest) returns (Note) {}
     rpc DeleteNote(DeleteNoteRequest) returns (Note) {}
 }
