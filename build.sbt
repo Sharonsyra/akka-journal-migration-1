@@ -1,8 +1,8 @@
 name := "chief-of-state-journal-migration-test"
 
-version := "0.1"
+version  in ThisBuild := "0.1"
 
-scalaVersion := "2.13.3"
+scalaVersion in ThisBuild := "2.13.3"
 
 mainClass in (Compile, run) := Some("com.namely.notable.Notable")
 
