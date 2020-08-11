@@ -12,7 +12,8 @@ final case class JournalEntity (
   message: Array[Byte]
 )
 
-class JournalTable(tag: Tag) extends Table[JournalEntity](_tableTag = tag, None, _tableName = "new_journal") {
+class JournalTable(tag: Tag)
+  extends Table[JournalEntity](_tableTag = tag, _schemaName = Some("public"), _tableName = "new_journal") {
   override def * : ProvenShape[JournalEntity] =
     (
       ordering,

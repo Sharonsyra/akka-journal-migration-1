@@ -33,3 +33,5 @@ PB.protoSources in Compile := Seq(
 )
 
 enablePlugins(AkkaGrpcPlugin)
+
+akkaGrpcCodeGeneratorSettings += "server_power_apis"
