@@ -6,10 +6,17 @@ scalaVersion in ThisBuild := "2.13.3"
 
 mainClass in (Compile, run) := Some("com.namely.notable.NotableServiceServer")
 
+resolvers += Resolver.jcenterRepo
+libraryDependencies ++= {
+  Seq()
+}
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.8",
   "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
-  "org.slf4j" % "slf4j-simple" % "1.7.30"
+  "org.slf4j" % "slf4j-simple" % "1.7.30",
+  "com.typesafe.slick" % "slick_2.13" % "3.3.2",
+  "com.typesafe.slick" % "slick-hikaricp_2.13" % "3.3.2"
 )
 
 // Akka dependencies used by Lagom
