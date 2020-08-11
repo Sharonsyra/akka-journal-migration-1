@@ -2,23 +2,16 @@ version: "3.6"
 
 services:
   journalmigrationserver:
-    image: journalmigration-server
     build:
       context: .
-      dockerfile: db/Dockerfile
     ports:
       - 50051:50051
       - 50052:50052
-      - 50053:50053
-    environment:
-      - SERVICE_NAME=journalmigration
-      - COS_HOST=chiefofstate
-      - COS_PORT=9000
     depends_on:
-      - chiefofstate
       - postgres
-    volumes:
-      - .:/app
+    environment:
+      COS_HOST: "chiefofstate"
+      COS_PORT: "9000"
 
   postgres:
     image: postgres
@@ -40,8 +33,8 @@ services:
       - 5050:80
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.1.0
-#    hostname: "chiefofstate"
+    image: registry.namely.land/namely/chief-of-state:0.1.1
+    hostname: chiefofstate
     depends_on:
       - postgres
     ports:
@@ -50,13 +43,16 @@ services:
       - 9095:9095
       - 5266:5266
     environment:
+      LOG_LEVEL: INFO
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
+      COS_SERVICE_NAME: "chiefofstate"
       WRITE_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
       WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
-      HANDLER_SERVICE_STATE_PROTO: "notable.Note"
-      HANDLER_SERVICE_EVENTS_PROTOS: "notable.NoteCreated,notable.NoteChanged,notable.NoteDeleted"
-      COS_SERVICE_NAME: "chiefofstate"
+      HANDLER_SERVICE_STATES_PROTO: "com.namely.protobuf.notable.Note"
+      HANDLER_SERVICE_EVENTS_PROTOS: "com.namely.protobuf.notable.NoteCreated,com.namely.protobuf.notable.NoteChanged,com.namely.protobuf.notable.NoteDeleted"
+      TRACE_HOST: tracer
+      TRACE_PORT: 14268
       NAMELY_ENV: "dev"
       TEAM_NAME: "data"
       COS_POSTGRES_USER: "postgres"
@@ -76,4 +72,6 @@ services:
       COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
       READ_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
       READ_SIDE_HANDLER_SERVICE_PORT: 50053
+      COS_READSIDE_CONFIG__HOST__LOGGER_READSIDE: journalmigrationserver
+      COS_READSIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"

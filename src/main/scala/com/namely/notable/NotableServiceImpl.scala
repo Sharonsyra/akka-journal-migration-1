@@ -8,10 +8,11 @@ import com.namely.protobuf.notable.grpc._
 import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
 import com.google.protobuf.any.Any
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 
-class NotableServiceImpl extends NotableService {
+class NotableServiceImpl() extends NotableService {
 
   // Boot akka
   implicit val sys = ActorSystem("NotableClient")
@@ -23,9 +24,11 @@ class NotableServiceImpl extends NotableService {
   // Create a client-side stub for the service
   val client = ChiefOfStateServiceClient(clientSettings)
 
+  val log = LoggerFactory.getLogger(classOf[NotableServiceImpl])
+
   override def createNote(in: CreateNoteRequest): Future[Note] = {
 
-    sys.log.info(s"Creating Note ${in.noteTitle}")
+    log.info(s"Creating Note ${in.noteTitle}")
 
     val entityUuid = UUID.randomUUID().toString
 
@@ -35,12 +38,14 @@ class NotableServiceImpl extends NotableService {
         .withNoteTitle(in.noteTitle)
         .withNoteContent(in.noteContent)
 
+    log.info(s"Command ${Any.pack(cmd)} received")
+
     val processCmd =
       ProcessCommandRequest()
         .withEntityId(entityUuid)
         .withCommand(Any.pack(cmd))
 
-    sys.log.info("Sending command to chief of state")
+    log.info("Sending command to chief of state")
 
     val reply: Future[ProcessCommandResponse] = client.processCommand(processCmd)
 

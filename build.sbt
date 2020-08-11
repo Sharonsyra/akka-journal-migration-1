@@ -4,11 +4,12 @@ version  in ThisBuild := "0.1"
 
 scalaVersion in ThisBuild := "2.13.3"
 
-mainClass in (Compile, run) := Some("com.namely.notable.Notable")
+mainClass in (Compile, run) := Some("com.namely.notable.NotableServer")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.8",
-  "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+  "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+  "org.slf4j" % "slf4j-simple" % "1.7.30"
 )
 
 // Akka dependencies used by Lagom
