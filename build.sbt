@@ -4,7 +4,7 @@ version  in ThisBuild := "0.1"
 
 scalaVersion in ThisBuild := "2.13.3"
 
-mainClass in (Compile, run) := Some("com.namely.notable.NotableServer")
+mainClass in (Compile, run) := Some("com.namely.notable.NotableServiceServer")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.8",

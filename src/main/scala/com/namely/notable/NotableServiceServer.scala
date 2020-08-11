@@ -1,14 +1,17 @@
 package com.namely.notable
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.{Http, Http2, HttpConnectionContext}
+import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import com.namely.protobuf.notable.grpc.NotableServiceHandler
 import com.typesafe.config.ConfigFactory
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object NotableServer {
+object NotableServiceServer {
+
+  val log = LoggerFactory.getLogger(classOf[NotableServiceServer])
 
   def main(args: Array[String]): Unit = {
 
@@ -16,16 +19,21 @@ object NotableServer {
     val conf = ConfigFactory.load()
 
     val system = ActorSystem("NotableClient", conf)
-    new NotableServer(system).run()
 
-    new WriteHandlerServer(system).run()
+    log.info("Starting the server")
+
+    new NotableServiceServer(system).run()
+
+    new WriteHandlerServiceServer(system).run()
+
+    new ReadSideHandlerServiceServer(system).run()
 
     // ActorSystem threads will keep the app alive until `system.terminate()` is called
   }
 
 }
 
-class NotableServer(system: ActorSystem) {
+class NotableServiceServer(system: ActorSystem) {
 
   def run(): Future[Http.ServerBinding] = {
     // Akka boot up code
@@ -36,7 +44,7 @@ class NotableServer(system: ActorSystem) {
     val service: HttpRequest => Future[HttpResponse] =
       NotableServiceHandler(new NotableServiceImpl())
 
-    // Bind service handler servers to localhost:8080/8081
+    // Bind service handler servers to localhost:50051
     val binding =
       Http().bindAndHandleAsync(
       handler = service,

@@ -11,6 +11,8 @@ import com.namely.protobuf.notable._
 import io.grpc.Status
 import org.slf4j.LoggerFactory
 
+import scala.util.{Failure, Success, Try}
+
 class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
 
   // Boot akka
@@ -26,22 +28,21 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
   override def handleCommand(in: HandleCommandRequest): Future[HandleCommandResponse] = {
 
     log.info(s"Handling received command ${in.command.get}")
+
     val priorState: Note = in.currentState match {
       case Some(value) =>
         log.info(s"State value is: ${Note.parseFrom(value.toByteArray)}")
         Note.parseFrom(value.toByteArray)
       case None => Note.defaultInstance
     }
-//      in.currentState.getOrElse(Note.defaultInstance)
-    log.info(s"Handle Command state value is: ${priorState}")
-//    val priorState: Note = Note.parseFrom(state.toByteArray)
-//    log.info(s"Handle Command prior state value is: ${priorState}")
-    //    val state: Note = in.currentState.map(_.unpack[Note]).getOrElse(Note.defaultInstance)
+
+    log.info(s"Handle Command state value is: $priorState")
+
     val priorMetaData = in.meta match {
       case Some(value) => value
       case None => MetaData.defaultInstance
       }
-//    val priorMeta: MetaData = in.meta.getOrElse(MetaData.defaultInstance)
+
     log.info(s"Handle Command Metadata value is: ${priorMetaData}")
 
     in.command match {
@@ -68,9 +69,6 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
   override def handleEvent(in: HandleEventRequest): Future[HandleEventResponse] = {
     log.info("Handling received event")
 
-//    val priotState = in.currentState.map(_.unpack[Note]).getOrElse(Note.defaultInstance)
-//    val priorMeta = in.meta.getOrElse(MetaData.defaultInstance)
-
     val priorState: Note = in.currentState match {
       case Some(value) =>
         log.info(s"State value is: ${Note.parseFrom(value.toByteArray)}")
@@ -78,10 +76,14 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
       case None => Note.defaultInstance
     }
 
+    log.info(s"Handle Event state value is: $priorState")
+
     val priorMetaData = in.meta match {
       case Some(value) => value
       case None => MetaData.defaultInstance
     }
+
+    log.info(s"Handle Event metadata value is: $priorMetaData")
 
     in.event match {
       case Some(value) => log.info(s"Handle event Some event => $value")
@@ -107,13 +109,17 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
 
     log.info("In command handler")
 
-    require(command.noteTitle.nonEmpty, "Note title is required!")
-
-    val noteCreatedEvent: NoteCreated =
-      NoteCreated()
+    val noteCreatedEvent: NoteCreated = Try(
+      require(command.noteTitle.nonEmpty, "Note title is required!")
+    ) match {
+      case Success(_) =>
+        NoteCreated()
         .withNoteId(command.noteId)
         .withNoteTitle(command.noteTitle)
         .withNoteContent(command.noteContent)
+      case Failure(exception) =>
+        throw new GrpcServiceException(Status.INVALID_ARGUMENT.withDescription(exception.getMessage))
+    }
 
     log.info(s"Packed event in handleCreateNote ${Any.pack(noteCreatedEvent)}")
 
@@ -139,8 +145,12 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
     metaData: MetaData
   ): Future[HandleCommandResponse] = {
 
-    require(command.noteId.nonEmpty, "Note ID is required!")
-    require(command.noteId.equals(state.noteId), "Wrong Note Id sent!")
+    Try(require(command.noteId.nonEmpty, "Note ID is required!"))
+      .map(_ => require(command.noteId.equals(state.noteId), "Wrong Note Id sent!")) match {
+      case Success(_) => None
+      case Failure(exception) =>
+        throw new GrpcServiceException(Status.INVALID_ARGUMENT.withDescription(exception.getMessage))
+    }
 
     log.info("Persisting Handle Command response...... ")
 
@@ -160,14 +170,17 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
     state: Note,
     metaData: MetaData
   ): Future[HandleCommandResponse] = {
-    require(command.noteId.nonEmpty, "Note ID is required!")
-    require(command.noteId.equals(state.noteId), "Wrong Note Id sent!")
 
-    val noteChangedEvent =
-      NoteChanged()
-        .withNoteId(command.noteId)
-        .withNoteTitle(command.noteTitle)
-        .withNoteContent(command.noteContent)
+    val noteChangedEvent: NoteChanged = Try(require(command.noteId.nonEmpty, "Note ID is required!"))
+      .map(_ => require(command.noteId.equals(state.noteId), "Wrong Note Id sent!")) match {
+        case Success(_) =>
+          NoteChanged()
+            .withNoteId(command.noteId)
+            .withNoteTitle(command.noteTitle)
+            .withNoteContent(command.noteContent)
+        case Failure(exception) =>
+          throw new GrpcServiceException(Status.INVALID_ARGUMENT.withDescription(exception.getMessage))
+    }
 
     val any: Any = Any.pack(noteChangedEvent)
 
@@ -188,12 +201,16 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
     state: Note,
     data: MetaData
   ): Future[HandleCommandResponse] = {
-    require(command.noteId.nonEmpty, "Note ID is required!")
-    require(command.noteId.equals(state.noteId), "Wrong Note Id sent!")
 
     val noteDeletedEvent =
-      NoteDeleted()
-        .withNoteId(command.noteId)
+      Try(require(command.noteId.nonEmpty, "Note ID is required!"))
+        .map(_ => require(command.noteId.equals(state.noteId), "Wrong Note Id sent!")) match {
+          case Success(_) =>
+            NoteDeleted()
+              .withNoteId(command.noteId)
+          case Failure(exception) =>
+            throw new GrpcServiceException(Status.INVALID_ARGUMENT.withDescription(exception.getMessage))
+    }
 
     val any: Any = Any.pack(noteDeletedEvent)
 
@@ -214,6 +231,7 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
     state: Note,
     metaData: MetaData
   ): Future[HandleEventResponse] = {
+
     val updatedStated =
       state.update(
         _.noteId := event.noteId,
@@ -234,6 +252,7 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
     state: Note,
     metaData: MetaData
   ): Future[HandleEventResponse] = {
+
     val updatedStated =
       state.update(
         _.noteId := event.noteId,
@@ -249,7 +268,12 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
     )
   }
 
-  private def handleNoteDeleted(event: NoteDeleted, state: Note, metaData: MetaData): Future[HandleEventResponse] = {
+  private def handleNoteDeleted(
+    event: NoteDeleted,
+    state: Note,
+    metaData: MetaData
+  ): Future[HandleEventResponse] = {
+
     val updatedStated =
       state.update(
         _.noteId := event.noteId,

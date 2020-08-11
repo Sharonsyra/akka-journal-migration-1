@@ -3,12 +3,11 @@ package com.namely.notable
 import akka.actor.ActorSystem
 import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import com.namely.protobuf.chief_of_state.WriteSideHandlerServiceHandler
+import com.namely.protobuf.chief_of_state.ReadSideHandlerServiceHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WriteHandlerServer(system: ActorSystem) {
-
+class ReadSideHandlerServiceServer(system: ActorSystem) {
   def run(): Future[Http.ServerBinding] = {
     // Akka boot up code
     implicit val sys: ActorSystem = system
@@ -16,19 +15,19 @@ class WriteHandlerServer(system: ActorSystem) {
 
     // Create service handlers
     val service: HttpRequest => Future[HttpResponse] =
-      WriteSideHandlerServiceHandler(new WriteSideHandlerServiceImpl())
+      ReadSideHandlerServiceHandler(new ReadSideHandlerServiceImpl())
 
-    // Bind service handler servers to localhost:8080/8081
+    // Bind service handler servers to localhost:50053
     val binding = Http()
       .bindAndHandleAsync(
-      handler = service,
-      interface = "0.0.0.0",
-      port = 50052,
-      connectionContext = HttpConnectionContext()
-    )
+        handler = service,
+        interface = "0.0.0.0",
+        port = 50053,
+        connectionContext = HttpConnectionContext()
+      )
 
     // report successful binding
-    binding.foreach { binding => println(s"Write Handler gRPC server bound to: ${binding.localAddress}") }
+    binding.foreach { binding => println(s"Read Side Handler gRPC server bound to: ${binding.localAddress}") }
 
     binding
   }
