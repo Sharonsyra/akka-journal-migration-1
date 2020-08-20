@@ -36,14 +36,10 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
       case None => Note.defaultInstance
     }
 
-    log.info(s"Handle Command state value is: $priorState")
-
     val priorMetaData = in.meta match {
       case Some(value) => value
       case None => MetaData.defaultInstance
       }
-
-    log.info(s"Handle Command Metadata value is: ${priorMetaData}")
 
     in.command match {
       case Some(value) => log.info(s" Handle command Some command => $value")
@@ -76,14 +72,10 @@ class WriteSideHandlerServiceImpl  extends WriteSideHandlerService {
       case None => Note.defaultInstance
     }
 
-    log.info(s"Handle Event state value is: $priorState")
-
     val priorMetaData = in.meta match {
       case Some(value) => value
       case None => MetaData.defaultInstance
     }
-
-    log.info(s"Handle Event metadata value is: $priorMetaData")
 
     in.event match {
       case Some(value) => log.info(s"Handle event Some event => $value")

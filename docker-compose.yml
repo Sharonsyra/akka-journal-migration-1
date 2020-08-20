@@ -38,6 +38,7 @@ services:
     hostname: chiefofstate
     depends_on:
       - postgres
+      - journalmigrationserver
     ports:
       - 9000:9000
       - 9102:9102
@@ -73,6 +74,6 @@ services:
       COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
       READ_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
       READ_SIDE_HANDLER_SERVICE_PORT: 50053
-      COS_READ_SIDE_CONFIG__HOST__RS1: journalmigrationserver
-      COS_READ_SIDE_CONFIG__PORT__RS1: 50053
+#      COS_READ_SIDE_CONFIG__HOST__RS1: journalmigrationserver
+#      COS_READ_SIDE_CONFIG__PORT__RS1: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"

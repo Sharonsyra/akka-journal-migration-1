@@ -53,12 +53,13 @@ class NotableServiceImpl() extends NotableService {
       response.state match {
         case Some(value) => value.unpack[Note]
         case None => Note.defaultInstance
-      }}
+      }
+    }
 
   }
 
   override def getNote(in: GetNoteRequest): Future[Note] = {
-    sys.log.info(s"Retrieving Note ${in.noteId}")
+    log.info(s"Retrieving Note ${in.noteId}")
 
     val cmd =
       GetNoteRequest()
@@ -69,7 +70,7 @@ class NotableServiceImpl() extends NotableService {
         .withEntityId(in.noteId)
         .withCommand(Any.pack(cmd))
 
-    sys.log.info("Sending command to chief of state")
+    log.info("Sending command to chief of state")
 
     val reply: Future[ProcessCommandResponse] = client.processCommand(processCmd)
 
@@ -82,7 +83,7 @@ class NotableServiceImpl() extends NotableService {
   }
 
   override def changeNote(in: ChangeNoteRequest): Future[Note] = {
-    sys.log.info(s"Updating Note ${in.noteId}")
+    log.info(s"Updating Note ${in.noteId}")
 
     val cmd =
       ChangeNoteRequest()
@@ -95,7 +96,7 @@ class NotableServiceImpl() extends NotableService {
         .withEntityId(in.noteId)
         .withCommand(Any.pack(cmd))
 
-    sys.log.info("Sending command to chief of state")
+    log.info("Sending command to chief of state")
 
     val reply: Future[ProcessCommandResponse] = client.processCommand(processCmd)
 
@@ -107,7 +108,7 @@ class NotableServiceImpl() extends NotableService {
   }
 
   override def deleteNote(in: DeleteNoteRequest): Future[Note] = {
-    sys.log.info(s"Deleting Note ${in.noteId}")
+    log.info(s"Deleting Note ${in.noteId}")
 
     val cmd =
       DeleteNoteRequest()
@@ -118,7 +119,7 @@ class NotableServiceImpl() extends NotableService {
         .withEntityId(in.noteId)
         .withCommand(Any.pack(cmd))
 
-    sys.log.info("Sending command to chief of state")
+    log.info("Sending command to chief of state")
 
     val reply: Future[ProcessCommandResponse] = client.processCommand(processCmd)
 
