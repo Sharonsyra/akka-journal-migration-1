@@ -34,7 +34,7 @@ services:
       - 5050:80
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:master-4aa06a
+    image: registry.namely.land/namely/chief-of-state:0.1.1
     hostname: chiefofstate
     depends_on:
       - postgres
@@ -51,7 +51,7 @@ services:
       COS_SERVICE_NAME: "chiefofstate"
       WRITE_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
       WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
-      HANDLER_SERVICE_STATES_PROTOS: "com.namely.protobuf.notable.Note"
+      HANDLER_SERVICE_STATES_PROTO: "com.namely.protobuf.notable.Note"
       HANDLER_SERVICE_EVENTS_PROTOS: "com.namely.protobuf.notable.NoteCreated,com.namely.protobuf.notable.NoteChanged,com.namely.protobuf.notable.NoteDeleted"
       TRACE_HOST: tracer
       TRACE_PORT: 14268
@@ -72,8 +72,6 @@ services:
       COS_READ_SIDE_OFFSET_DB_PASSWORD: "changeme"
       COS_READ_SIDE_OFFSET_DB: "postgres"
       COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
-      READ_SIDE_HANDLER_SERVICE_HOST: journalmigrationserver
-      READ_SIDE_HANDLER_SERVICE_PORT: 50053
-#      COS_READ_SIDE_CONFIG__HOST__RS1: journalmigrationserver
-#      COS_READ_SIDE_CONFIG__PORT__RS1: 50053
+      COS_READ_SIDE_CONFIG__HOST__RS1: journalmigrationserver
+      COS_READ_SIDE_CONFIG__PORT__RS1: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"
